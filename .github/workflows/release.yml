@@ -1,0 +1,67 @@
+name: Release Docker image
+
+on:
+  push:
+    
+permissions:
+  contents: read
+  packages: write
+  id-token: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        ros:
+          - jazzy
+
+    env:
+      REGISTRY: ghcr.io
+      IMAGE_NAME: lotusim
+      LOTUSIM_WS: /lotusim_ws
+      LOTUSIM_PATH: /lotusim_ws/src/LOTUSim
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract short commit SHA
+        id: commit
+        run: |
+          echo "short_sha=${GITHUB_SHA::7}" >> $GITHUB_OUTPUT
+
+      - name: Normalize repository name (lowercase)
+        id: repo
+        run: |
+          echo "repo=${GITHUB_REPOSITORY,,}" >> $GITHUB_OUTPUT
+
+      - name: Build and push Docker image
+        id: image    
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: |
+            ghcr.io/${{ steps.repo.outputs.repo }}:${{ matrix.ros }}-${{ steps.commit.outputs.short_sha }}
+            ghcr.io/${{ steps.repo.outputs.repo }}:${{ matrix.ros }}-latest
+          build-args: |
+            ROS_DISTRO=${{ matrix.ros }}
+      
+      - name: Install cosign
+        uses: sigstore/cosign-installer@v4.0.0
+        with:
+          cosign-release: 'v2.6.2'
+
+      - name: Sign container image
+        run: |
+          cosign sign --yes ghcr.io/${{ steps.repo.outputs.repo }}@${{ steps.image.outputs.digest }}
