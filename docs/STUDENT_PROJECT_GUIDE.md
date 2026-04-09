@@ -2,6 +2,9 @@
 
 This guide is meant to help a new contributor understand **how the repository is organized**, **which modules do what**, and **where to start reading and experimenting**.
 
+For a more beginner-oriented architecture overview and learning roadmap, see
+[`BEGINNER_SYSTEM_ARCHITECTURE.md`](BEGINNER_SYSTEM_ARCHITECTURE.md).
+
 ---
 
 ## 1) What LOTUSim is (in one minute)
