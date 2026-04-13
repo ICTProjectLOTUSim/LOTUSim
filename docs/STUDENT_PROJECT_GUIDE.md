@@ -5,6 +5,9 @@ This guide is meant to help a new contributor understand **how the repository is
 For a more beginner-oriented architecture overview and learning roadmap, see
 [`BEGINNER_SYSTEM_ARCHITECTURE.md`](BEGINNER_SYSTEM_ARCHITECTURE.md).
 
+For a Gazebo-first pathway focused on worlds, models, and Gazebo source code,
+see [`GAZEBO_LEARNING_PATHWAY.md`](GAZEBO_LEARNING_PATHWAY.md).
+
 ---
 
 ## 1) What LOTUSim is (in one minute)

@@ -3,6 +3,9 @@
 This document is for a new contributor who is starting LOTUSim with little or
 no robotics, ROS 2, or Gazebo experience.
 
+If you want a more detailed Gazebo-first reading order, see
+[`GAZEBO_LEARNING_PATHWAY.md`](GAZEBO_LEARNING_PATHWAY.md).
+
 The short version:
 
 - Learn Gazebo and SDF first if you want to add models, worlds, or scenarios.
