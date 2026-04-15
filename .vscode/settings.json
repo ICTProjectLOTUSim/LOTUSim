@@ -95,5 +95,10 @@
         "editor.defaultFormatter": "ms-vscode.cpptools",
         "editor.formatOnSave": true
     },
-    "cmake.sourceDirectory": "/home/malcom/lotusim_ws/src/lotusim/systems/sensors/lotusim_sensor_base"
+    "clangd.path": "/usr/bin/clangd",
+    "clangd.arguments": [
+        "--compile-commands-dir=/home/gechhai/Documents/ICTProject/LOTUSim/build/waypoint_follower_plugin"
+    ],
+    "C_Cpp.default.compileCommands": "/home/gechhai/Documents/ICTProject/LOTUSim/build/waypoint_follower_plugin/compile_commands.json",
+    "cmake.sourceDirectory": "/home/gechhai/Documents/ICTProject/LOTUSim"
 }

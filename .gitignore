@@ -6,3 +6,8 @@ docs/doxygen
 lotus_logs/*
 .ipynb_checkpoints
 *.rviz
+
+# Colcon / ROS build artifacts
+build/
+install/
+log/
