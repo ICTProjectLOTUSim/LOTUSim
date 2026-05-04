@@ -315,6 +315,11 @@ source_environment() {
     export GZ_SIM_RESOURCE_PATH="${MODEL_PATH}"
     export LOTUSIM_SPDLOG_LEVEL="${LOTUSIM_SPDLOG_LEVEL}"
 
+    # Sourcing the ROS workspace sets GZ_CONFIG_PATH to vendor-only paths,
+    # which hides the system gz sim8.yaml and makes `gz sim` unavailable.
+    # Append the system gz config directory so all gz subcommands work.
+    export GZ_CONFIG_PATH="${GZ_CONFIG_PATH}:/usr/share/gz"
+
     echo -e "${GREEN}GZ_SIM_SYSTEM_PLUGIN_PATH${NC}: $GZ_SIM_SYSTEM_PLUGIN_PATH"
     echo -e "${GREEN}GZ_SIM_RESOURCE_PATH${NC}: $GZ_SIM_RESOURCE_PATH"
     echo -e "${YELLOW}LOTUSIM_SPDLOG_LEVEL${NC}: $LOTUSIM_SPDLOG_LEVEL"
