@@ -32,7 +32,7 @@ from launch.actions import (
     TimerAction,
 )
 from launch.conditions import IfCondition, UnlessCondition
-from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
+from launch.substitutions import LaunchConfiguration, PythonExpression
 from launch_ros.actions import Node
 
 
@@ -91,17 +91,20 @@ def generate_launch_description():
     # ---------------------------------------------------------------------------
     # Keyboard teleop (default input)
     # ---------------------------------------------------------------------------
+    is_joystick = IfCondition(
+        PythonExpression(["'", LaunchConfiguration("input"), "' == 'joystick'"])
+    )
+    is_keyboard = UnlessCondition(
+        PythonExpression(["'", LaunchConfiguration("input"), "' == 'joystick'"])
+    )
+
     keyboard_teleop = Node(
         package="teleop_twist_keyboard",
         executable="teleop_twist_keyboard",
         name="drone_keyboard_teleop",
         output="screen",
         remappings=[("cmd_vel", "/drone/cmd_vel")],
-        condition=UnlessCondition(
-            # active when input != joystick (i.e. when input == keyboard)
-            LaunchConfiguration("input") == "joystick"
-        ),
-        prefix="xterm -e",  # open in own terminal window so keyboard input is captured
+        condition=is_keyboard,
     )
 
     # ---------------------------------------------------------------------------
@@ -112,9 +115,7 @@ def generate_launch_description():
         executable="joy_node",
         name="drone_joy_node",
         output="screen",
-        condition=IfCondition(
-            LaunchConfiguration("input") == "joystick"
-        ),
+        condition=is_joystick,
     )
 
     joystick_config = os.path.join(pkg_share, "config", "joystick", "teleop_joy_drone.yaml")
@@ -126,9 +127,7 @@ def generate_launch_description():
         output="screen",
         parameters=[joystick_config],
         remappings=[("cmd_vel", "/drone/cmd_vel")],
-        condition=IfCondition(
-            LaunchConfiguration("input") == "joystick"
-        ),
+        condition=is_joystick,
     )
 
     # ---------------------------------------------------------------------------
