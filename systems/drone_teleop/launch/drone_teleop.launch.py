@@ -98,12 +98,20 @@ def generate_launch_description():
         PythonExpression(["'", LaunchConfiguration("input"), "' == 'joystick'"])
     )
 
-    keyboard_teleop = Node(
-        package="teleop_twist_keyboard",
-        executable="teleop_twist_keyboard",
-        name="drone_keyboard_teleop",
+    # teleop_twist_keyboard requires an interactive TTY — it cannot run as a
+    # launch subprocess. We spawn it in its own gnome-terminal window instead.
+    keyboard_teleop = ExecuteProcess(
+        cmd=[
+            "gnome-terminal", "--",
+            "bash", "-c",
+            (
+                "source ~/lotusim_ws/install/setup.bash && "
+                "ros2 run teleop_twist_keyboard teleop_twist_keyboard "
+                "--ros-args -r cmd_vel:=/drone/cmd_vel; "
+                "exec bash"
+            ),
+        ],
         output="screen",
-        remappings=[("cmd_vel", "/drone/cmd_vel")],
         condition=is_keyboard,
     )
 
