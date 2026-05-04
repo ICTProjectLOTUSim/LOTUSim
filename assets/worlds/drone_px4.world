@@ -1,0 +1,207 @@
+<?xml version="1.0"?>
+<sdf version="1.9">
+  <!--
+    drone_px4.world
+    ===============
+    PX4 SITL-ready simulation world for the x500 quadcopter.
+
+    DIFFERENCE FROM drone_test.world
+    ---------------------------------
+    The MulticopterVelocityControl plugin has been REMOVED.
+    PX4 SITL drives the motors directly by publishing to:
+        /model/x500_drone/command/motor_speed   (gz.msgs.Actuators)
+
+    The four MulticopterMotorModel plugins remain unchanged —
+    they convert PX4's actuator commands into physics forces.
+
+    HOW TO USE
+    ----------
+    Terminal 1 (simulation):
+        lotusim run --gui drone_px4.world
+
+    Terminal 2 (PX4 SITL — once built):
+        cd ~/PX4-Autopilot
+        PX4_SYS_AUTOSTART=4001 PX4_GZ_MODEL_NAME=x500_drone \
+        ./build/px4_sitl_default/bin/px4
+
+    Terminal 3 (QGroundControl — connect joystick or keyboard):
+        ./QGroundControl.AppImage
+
+    Sensor topic paths (PX4 reads these automatically):
+        /world/drone_px4/model/x500_drone/link/base_link/sensor/imu_sensor/imu
+        /world/drone_px4/model/x500_drone/link/base_link/sensor/navsat_sensor/navsat
+        /world/drone_px4/model/x500_drone/link/base_link/sensor/magnetometer_sensor/magnetometer
+        /world/drone_px4/model/x500_drone/link/base_link/sensor/air_pressure_sensor/air_pressure
+
+    Actuator topic PX4 publishes to:
+        /model/x500_drone/command/motor_speed
+  -->
+
+  <world name="drone_px4">
+
+    <scene>
+      <ambient>1.0 1.0 1.0</ambient>
+      <background>0.8 0.8 0.8</background>
+      <grid>true</grid>
+    </scene>
+
+    <gravity>0 0 -9.8066</gravity>
+
+    <!-- Fast physics required for stable PX4 control loop (250 Hz) -->
+    <physics type="ode">
+      <max_step_size>0.004</max_step_size>
+      <real_time_update_rate>250</real_time_update_rate>
+      <real_time_factor>1</real_time_factor>
+    </physics>
+
+    <!-- Geographic coordinates (Singapore) — matches PX4 EKF2 home position -->
+    <spherical_coordinates>
+      <surface_model>EARTH_WGS84</surface_model>
+      <world_frame_orientation>ENU</world_frame_orientation>
+      <latitude_deg>1.2421</latitude_deg>
+      <longitude_deg>103.7198</longitude_deg>
+      <elevation>0</elevation>
+      <heading_deg>0</heading_deg>
+    </spherical_coordinates>
+
+    <!-- Core Gazebo system plugins -->
+    <plugin filename="gz-sim-physics-system"          name="gz::sim::systems::Physics"/>
+    <plugin filename="gz-sim-scene-broadcaster-system" name="gz::sim::systems::SceneBroadcaster"/>
+    <plugin filename="gz-sim-imu-system"              name="gz::sim::systems::Imu"/>
+    <plugin filename="gz-sim-magnetometer-system"     name="gz::sim::systems::Magnetometer"/>
+    <plugin filename="gz-sim-air-pressure-system"     name="gz::sim::systems::AirPressure"/>
+    <plugin filename="gz-sim-sensors-system"          name="gz::sim::systems::Sensors"/>
+    <plugin filename="gz-sim-navsat-system"           name="gz::sim::systems::NavSat"/>
+
+    <!-- Ground plane -->
+    <model name="ground_plane">
+      <static>true</static>
+      <link name="link">
+        <collision name="collision">
+          <geometry>
+            <plane>
+              <normal>0 0 1</normal>
+              <size>100 100</size>
+            </plane>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <plane>
+              <normal>0 0 1</normal>
+              <size>100 100</size>
+            </plane>
+          </geometry>
+          <material>
+            <ambient>0.8 0.8 0.8 1</ambient>
+            <diffuse>0.8 0.8 0.8 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- X500 drone — motor models only, NO velocity controller -->
+    <include>
+      <uri>model://x500_manual_control</uri>
+      <name>x500_drone</name>
+      <pose>0 0 0.5 0 0 0</pose>
+
+      <!--
+        Motor model plugins.
+        PX4 publishes gz.msgs.Actuators to /model/x500_drone/command/motor_speed.
+        Each plugin subscribes to commandSubTopic (scoped by robotNamespace) and
+        converts the commanded velocity to a physics thrust/torque force.
+
+        commandSubTopic must match what PX4 publishes.
+        PX4 Harmonic default: /model/{name}/command/motor_speed
+        → with robotNamespace empty or matching the model name this resolves correctly.
+      -->
+      <plugin filename="gz-sim-multicopter-motor-model-system"
+        name="gz::sim::systems::MulticopterMotorModel">
+        <robotNamespace>x500_drone</robotNamespace>
+        <jointName>rotor_0_joint</jointName>
+        <linkName>rotor_0</linkName>
+        <turningDirection>ccw</turningDirection>
+        <timeConstantUp>0.0125</timeConstantUp>
+        <timeConstantDown>0.025</timeConstantDown>
+        <maxRotVelocity>800.0</maxRotVelocity>
+        <motorConstant>8.54858e-06</motorConstant>
+        <momentConstant>0.016</momentConstant>
+        <commandSubTopic>command/motor_speed</commandSubTopic>
+        <motorNumber>0</motorNumber>
+        <rotorDragCoefficient>8.06428e-05</rotorDragCoefficient>
+        <rollingMomentCoefficient>1e-06</rollingMomentCoefficient>
+        <motorSpeedPubTopic>motor_speed/0</motorSpeedPubTopic>
+        <rotorVelocitySlowdownSim>10</rotorVelocitySlowdownSim>
+        <motorType>velocity</motorType>
+      </plugin>
+
+      <plugin filename="gz-sim-multicopter-motor-model-system"
+        name="gz::sim::systems::MulticopterMotorModel">
+        <robotNamespace>x500_drone</robotNamespace>
+        <jointName>rotor_1_joint</jointName>
+        <linkName>rotor_1</linkName>
+        <turningDirection>ccw</turningDirection>
+        <timeConstantUp>0.0125</timeConstantUp>
+        <timeConstantDown>0.025</timeConstantDown>
+        <maxRotVelocity>800.0</maxRotVelocity>
+        <motorConstant>8.54858e-06</motorConstant>
+        <momentConstant>0.016</momentConstant>
+        <commandSubTopic>command/motor_speed</commandSubTopic>
+        <motorNumber>1</motorNumber>
+        <rotorDragCoefficient>8.06428e-05</rotorDragCoefficient>
+        <rollingMomentCoefficient>1e-06</rollingMomentCoefficient>
+        <motorSpeedPubTopic>motor_speed/1</motorSpeedPubTopic>
+        <rotorVelocitySlowdownSim>10</rotorVelocitySlowdownSim>
+        <motorType>velocity</motorType>
+      </plugin>
+
+      <plugin filename="gz-sim-multicopter-motor-model-system"
+        name="gz::sim::systems::MulticopterMotorModel">
+        <robotNamespace>x500_drone</robotNamespace>
+        <jointName>rotor_2_joint</jointName>
+        <linkName>rotor_2</linkName>
+        <turningDirection>cw</turningDirection>
+        <timeConstantUp>0.0125</timeConstantUp>
+        <timeConstantDown>0.025</timeConstantDown>
+        <maxRotVelocity>800.0</maxRotVelocity>
+        <motorConstant>8.54858e-06</motorConstant>
+        <momentConstant>0.016</momentConstant>
+        <commandSubTopic>command/motor_speed</commandSubTopic>
+        <motorNumber>2</motorNumber>
+        <rotorDragCoefficient>8.06428e-05</rotorDragCoefficient>
+        <rollingMomentCoefficient>1e-06</rollingMomentCoefficient>
+        <motorSpeedPubTopic>motor_speed/2</motorSpeedPubTopic>
+        <rotorVelocitySlowdownSim>10</rotorVelocitySlowdownSim>
+        <motorType>velocity</motorType>
+      </plugin>
+
+      <plugin filename="gz-sim-multicopter-motor-model-system"
+        name="gz::sim::systems::MulticopterMotorModel">
+        <robotNamespace>x500_drone</robotNamespace>
+        <jointName>rotor_3_joint</jointName>
+        <linkName>rotor_3</linkName>
+        <turningDirection>cw</turningDirection>
+        <timeConstantUp>0.0125</timeConstantUp>
+        <timeConstantDown>0.025</timeConstantDown>
+        <maxRotVelocity>800.0</maxRotVelocity>
+        <motorConstant>8.54858e-06</motorConstant>
+        <momentConstant>0.016</momentConstant>
+        <commandSubTopic>command/motor_speed</commandSubTopic>
+        <motorNumber>3</motorNumber>
+        <rotorDragCoefficient>8.06428e-05</rotorDragCoefficient>
+        <rollingMomentCoefficient>1e-06</rollingMomentCoefficient>
+        <motorSpeedPubTopic>motor_speed/3</motorSpeedPubTopic>
+        <rotorVelocitySlowdownSim>10</rotorVelocitySlowdownSim>
+        <motorType>velocity</motorType>
+      </plugin>
+
+      <!--
+        NO MulticopterVelocityControl plugin here.
+        PX4 SITL takes that role directly via gz-transport.
+      -->
+
+    </include>
+
+  </world>
+</sdf>
