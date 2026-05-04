@@ -24,6 +24,8 @@ setup(
     },
     entry_points={
         'console_scripts': [
+            'mock_px4_node = lotusim_drone_mocks.mock_px4_node:main',
+            'mock_entity_manager = lotusim_drone_mocks.mock_entity_manager:main',
         ],
     },
 )
