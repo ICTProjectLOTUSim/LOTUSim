@@ -17,10 +17,13 @@ Scope this semester is deliberately ROS 2 + mocks only. Real Pixhawk /
 | [`lotusim_drone_mission`](lotusim_drone_mission/) | `ament_python` | Manual control + mission recorder nodes. *(Sprint 3+)* |
 | [`lotusim_drone_mocks`](lotusim_drone_mocks/) | `ament_python` | Stand-ins for Pixhawk, LOTUSim entity_manager, UI, env sensors. |
 
-External dependencies cloned alongside this repo in the same colcon workspace:
+External dependency in the same colcon workspace:
 
 - [`px4_msgs`](https://github.com/PX4/px4_msgs) — PX4 message schemas (no agent, no SITL).
-- [`LOTUSim`](https://github.com/naval-group/LOTUSim) — only `interfaces/lotusim_msgs` is built; the C++ Gazebo systems are not.
+
+`lotusim_msgs` lives in this same repo at `../interfaces/lotusim_msgs/` and is
+the only LOTUSim subpackage built in this scope — the C++ Gazebo systems
+require Gazebo Harmonic and are out of scope here.
 
 The end-to-end topic / action contract (PX4 ↔ bridge ↔ LOTUSim ↔ UI) lives in
 [`docs/topics.md`](docs/topics.md).
@@ -35,16 +38,18 @@ The end-to-end topic / action contract (PX4 ↔ bridge ↔ LOTUSim ↔ UI) lives
 
 ## Workspace layout
 
-This repo is meant to live at `src/ROS2/` inside a colcon workspace, next to
-the two cloned dependencies:
+These packages live at `src/LOTUSim/drone/` inside a colcon workspace,
+alongside the one external clone (`px4_msgs`):
 
 ```
 <workspace>/
 ├── src/
-│   ├── ROS2/          # this repo
-│   ├── px4_msgs/      # https://github.com/PX4/px4_msgs (release/1.15)
-│   └── LOTUSim/       # https://github.com/naval-group/LOTUSim (only lotusim_msgs is built)
-├── build/   install/   log/    # populated by colcon
+│   ├── px4_msgs/                          # https://github.com/PX4/px4_msgs (release/1.15)
+│   └── LOTUSim/                           # https://github.com/ICTProjectLOTUSim/LOTUSim
+│       ├── drone/                         # ← this directory (drone integration ROS 2 pkgs)
+│       ├── interfaces/lotusim_msgs/       # built (action/msg contracts)
+│       └── …                              # Gazebo systems — not built in this scope
+├── build/   install/   log/               # populated by colcon
 ```
 
 `<workspace>` is mounted into the container as `/lotusim_ws`.

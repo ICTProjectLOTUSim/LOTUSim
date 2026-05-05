@@ -11,3 +11,9 @@ For issues or question about the simulation, please create an issue on our issue
 If you are interested in partnership or have questions regarding contributing to LOTUSim, please send an email to [LOTUSim support email](mailto:lotusim_support@naval-group.com) `lotusim_support@naval-group.com`.
 
 Upcoming open-source publication under [EPL-2.0](LICENSE).
+
+## Drone integration (project 2026-S1-45)
+
+ROS 2 drone-integration packages (PX4 ↔ LOTUSim bridge, mocks, mission
+recorder) live in [`drone/`](drone/) — see [`drone/README.md`](drone/README.md)
+for build and run instructions.
