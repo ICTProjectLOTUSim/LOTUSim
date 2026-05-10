@@ -265,7 +265,6 @@
             </z>
           </linear_acceleration>
         </imu>
-        <topic>/{world_name}/{name}/imu</topic>
       </sensor>
       <sensor name="air_pressure_sensor" type="air_pressure">
         <gz_frame_id>base_link</gz_frame_id>
@@ -280,7 +279,6 @@
             </noise>
           </pressure>
         </air_pressure>
-        <topic>/{world_name}/{name}/air_pressure</topic>
       </sensor>
       <sensor name="magnetometer_sensor" type="magnetometer">
         <gz_frame_id>base_link</gz_frame_id>
