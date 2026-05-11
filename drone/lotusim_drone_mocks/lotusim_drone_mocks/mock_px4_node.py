@@ -50,9 +50,14 @@ def px4_sub_qos() -> QoSProfile:
     )
 
 
+VEHICLE_CMD_COMPONENT_ARM_DISARM = 400
+
+
 class MockPx4Node(Node):
     def __init__(self) -> None:
         super().__init__('mock_px4_node')
+
+        self._arming_state = VehicleStatus.ARMING_STATE_DISARMED
 
         pub_qos = px4_pub_qos()
         self.pub_local_pos = self.create_publisher(
@@ -119,7 +124,7 @@ class MockPx4Node(Node):
     def _tick_status(self) -> None:
         msg = VehicleStatus()
         msg.timestamp = self._now_us()
-        msg.arming_state = VehicleStatus.ARMING_STATE_DISARMED
+        msg.arming_state = self._arming_state
         msg.nav_state = VehicleStatus.NAVIGATION_STATE_MANUAL
         msg.vehicle_type = VehicleStatus.VEHICLE_TYPE_ROTARY_WING
         msg.pre_flight_checks_pass = True
@@ -153,6 +158,13 @@ class MockPx4Node(Node):
             f'[vehicle_command] cmd={msg.command} '
             f'param1={msg.param1:.3f} param2={msg.param2:.3f} '
             f'target_system={msg.target_system}')
+        if int(msg.command) == VEHICLE_CMD_COMPONENT_ARM_DISARM:
+            if msg.param1 >= 0.5:
+                self._arming_state = VehicleStatus.ARMING_STATE_ARMED
+                self.get_logger().info('[mock_px4] arming_state -> ARMED')
+            else:
+                self._arming_state = VehicleStatus.ARMING_STATE_DISARMED
+                self.get_logger().info('[mock_px4] arming_state -> DISARMED')
 
 
 def main(args=None) -> None:
